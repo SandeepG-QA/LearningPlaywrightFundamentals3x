@@ -2,7 +2,7 @@
 
 Hands-on Playwright test automation fundamentals — a companion project to [Learning Playwright 3X](https://github.com/SandeepG-QA/LearningPlayWright3X) that takes the JavaScript/TypeScript basics and applies them to real browser automation with [`@playwright/test`](https://playwright.dev/).
 
-Tests are organized as a progressive learning path under `tests/`, numbered from the basics through test annotations and locator commands.
+Tests are organized as a progressive learning path under `tests/`, numbered from the basics through test annotations and locator commands, plus a `tests/Practice_Test/` folder for a full end-to-end practice flow.
 
 ## Project Structure
 
@@ -11,6 +11,7 @@ Tests are organized as a progressive learning path under `tests/`, numbered from
 | `tests/01_Basics/` | Launching browsers, contexts, and pages; writing your first specs; running tests against multiple users and with custom context options |
 | `tests/02_TestAnnotations/` | Annotating and grouping tests — `skip`, `only`, `fail`, `fixme`, `slow`, and `describe` blocks |
 | `tests/03_Locator_Commands/` | Locator commands, CSS selectors, and element interaction practice — navigating with options, filling the VWO login form, and setting a page/context referer |
+| `tests/Practice_Test/` | End-to-end practice flow — logging into the CURA healthcare demo app with CSS id locators and asserting the appointment page heading |
 
 ### `tests/01_Basics/`
 
@@ -38,6 +39,18 @@ Tests are organized as a progressive learning path under `tests/`, numbered from
 | `LC.spec.ts` | Navigation-option practice in a `verify x` spec — `page.goto()` to the The Testing Academy multi-element filter page with `waitUntil: 'commit'`, then a second navigation to `/login` with `waitUntil: 'domcontentloaded'`, an explicit `timeout`, and a `referer` (the `response` is captured from `goto` for later inspection) |
 | `Fresh.spec.ts` | CSS-selector locator practice against the VWO login page (`https://app.vwo.com`) — navigates with `waitUntil: 'domcontentloaded'`, a `timeout`, and a `referer: "https://sdet.live"`, then locates the fields by id (`#login-username`, `#login-password`, `#js-login-btn`), fills and submits invalid credentials, asserts the error banner (`#js-notification-box-msg`) with `toContainText`, and pauses with `page.pause()` to inspect locators |
 | `Refere.spec.ts` | Setting a **referer for an entire context** — builds a context with `browser.newContext({ extraHTTPHeaders: { "Referer": ... } })` so every request carries the header, then opens one page and visits two sites (VWO login and the Katalon CURA demo app), logging after each navigation |
+
+### `tests/Practice_Test/`
+
+| File | What it covers |
+|------|----------------|
+| `test.spec.ts` | An end-to-end practice flow against the Katalon CURA healthcare demo app (`https://katalon-demo-cura.herokuapp.com/`) — clicks the `#btn-make-appointment` link, fills the login form by id (`#txt-username` → `John Doe`, `#txt-password` → `ThisIsNotAPassword`), submits with `#btn-login`, and asserts the `h2` heading reads `Make Appointment` with `toHaveText`, before pausing with `page.waitForTimeout(3000)` |
+
+Run just this practice spec:
+
+```bash
+npx playwright test tests/Practice_Test
+```
 
 ### Project Files
 
@@ -159,3 +172,6 @@ node tests/01_Basics/BCP.spec.ts
 | Asserting on element text | `tests/03_Locator_Commands/Fresh.spec.ts` (`toContainText`) |
 | Referer header per page vs. per context | `tests/03_Locator_Commands/Fresh.spec.ts` (`goto` option), `tests/03_Locator_Commands/Refere.spec.ts` (`extraHTTPHeaders` via `newContext`) |
 | Inspecting locators with `page.pause()` | `tests/03_Locator_Commands/Fresh.spec.ts` |
+| End-to-end login flow with CSS id locators | `tests/Practice_Test/test.spec.ts` (`#btn-make-appointment`, `#txt-username`, `#txt-password`, `#btn-login`) |
+| Asserting exact element text | `tests/Practice_Test/test.spec.ts` (`toHaveText("Make Appointment")`) |
+| Fixed waits with `page.waitForTimeout()` | `tests/Practice_Test/test.spec.ts` |
