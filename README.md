@@ -10,7 +10,7 @@ Tests are organized as a progressive learning path under `tests/`, numbered from
 |---------------|----------------|
 | `tests/01_Basics/` | Launching browsers, contexts, and pages; writing your first specs; running tests against multiple users and with custom context options |
 | `tests/02_TestAnnotations/` | Annotating and grouping tests — `skip`, `only`, `fail`, `fixme`, `slow`, and `describe` blocks |
-| `tests/03_Locator_Commands/` | Locator commands and element interaction practice |
+| `tests/03_Locator_Commands/` | Locator commands, CSS selectors, and element interaction practice — navigating with options, filling the VWO login form, and setting a page/context referer |
 
 ### `tests/01_Basics/`
 
@@ -35,7 +35,9 @@ Tests are organized as a progressive learning path under `tests/`, numbered from
 
 | File | What it covers |
 |------|----------------|
-| `LC.spec.ts` | Locator command practice — a `verify x` spec that navigates to the The Testing Academy multi-element filter page, the starting point for exercising locators |
+| `LC.spec.ts` | Navigation-option practice in a `verify x` spec — `page.goto()` to the The Testing Academy multi-element filter page with `waitUntil: 'commit'`, then a second navigation to `/login` with `waitUntil: 'domcontentloaded'`, an explicit `timeout`, and a `referer` (the `response` is captured from `goto` for later inspection) |
+| `Fresh.spec.ts` | CSS-selector locator practice against the VWO login page (`https://app.vwo.com`) — navigates with `waitUntil: 'domcontentloaded'`, a `timeout`, and a `referer: "https://sdet.live"`, then locates the fields by id (`#login-username`, `#login-password`, `#js-login-btn`), fills and submits invalid credentials, asserts the error banner (`#js-notification-box-msg`) with `toContainText`, and pauses with `page.pause()` to inspect locators |
+| `Refere.spec.ts` | Setting a **referer for an entire context** — builds a context with `browser.newContext({ extraHTTPHeaders: { "Referer": ... } })` so every request carries the header, then opens one page and visits two sites (VWO login and the Katalon CURA demo app), logging after each navigation |
 
 ### Project Files
 
@@ -151,4 +153,9 @@ node tests/01_Basics/BCP.spec.ts
 | Asserting on page title | `tests/01_Basics/example.spec.ts` (`toHaveTitle`) |
 | Test annotations (`skip`, `only`, `fail`, `fixme`, `slow`) | `tests/02_TestAnnotations/TestAnnotation.spec.ts` |
 | Grouping tests with `describe` | `tests/02_TestAnnotations/TestDescribe.spec.ts` |
+| Navigation options (`waitUntil`, `timeout`, `referer`) | `tests/03_Locator_Commands/LC.spec.ts`, `tests/03_Locator_Commands/Fresh.spec.ts` |
 | Locator commands | `tests/03_Locator_Commands/LC.spec.ts` |
+| CSS selectors by id and filling form fields | `tests/03_Locator_Commands/Fresh.spec.ts` (`#login-username`, `#js-login-btn`, `fill`, `click`) |
+| Asserting on element text | `tests/03_Locator_Commands/Fresh.spec.ts` (`toContainText`) |
+| Referer header per page vs. per context | `tests/03_Locator_Commands/Fresh.spec.ts` (`goto` option), `tests/03_Locator_Commands/Refere.spec.ts` (`extraHTTPHeaders` via `newContext`) |
+| Inspecting locators with `page.pause()` | `tests/03_Locator_Commands/Fresh.spec.ts` |
