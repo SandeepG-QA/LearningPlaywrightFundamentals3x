@@ -11,7 +11,7 @@ Tests are organized as a progressive learning path under `tests/`, numbered from
 | `tests/01_Basics/` | Launching browsers, contexts, and pages; writing your first specs; running tests against multiple users and with custom context options |
 | `tests/02_TestAnnotations/` | Annotating and grouping tests — `skip`, `only`, `fail`, `fixme`, `slow`, and `describe` blocks |
 | `tests/03_Locator_Commands/` | Locator commands, CSS selectors, and element interaction practice — navigating with options, filling the VWO login form, and setting a page/context referer |
-| `tests/Practice_Test/` | End-to-end practice flow — logging into the CURA healthcare demo app with CSS id locators and asserting the appointment page heading |
+| `tests/Practice_Test/` | End-to-end practice flows — logging into the CURA healthcare demo app, signing into The Testing Academy app with XPath locators, and validating the VWO/Wingify free-trial email error |
 
 ### `tests/01_Basics/`
 
@@ -45,8 +45,10 @@ Tests are organized as a progressive learning path under `tests/`, numbered from
 | File | What it covers |
 |------|----------------|
 | `test.spec.ts` | An end-to-end practice flow against the Katalon CURA healthcare demo app (`https://katalon-demo-cura.herokuapp.com/`) — clicks the `#btn-make-appointment` link, fills the login form by id (`#txt-username` → `John Doe`, `#txt-password` → `ThisIsNotAPassword`), submits with `#btn-login`, and asserts the `h2` heading reads `Make Appointment` with `toHaveText`, before pausing with `page.waitForTimeout(3000)` |
+| `apptesting.spec.ts` | "TC # 01 - Student login on app testing academy" — a login flow on The Testing Academy practice app that exercises **XPath locators** instead of CSS: navigates to `https://app.thetestingacademy.com/playwright/multiple_element_filter`, fills the Email Address (`//input[@id='email']`) and Password (`//input[@id='password']`) fields, ticks the `//input[@type='checkbox']` consent box, clicks the `//button[@class='login-btn']` submit button, and asserts the resulting URL (including the reflected `email`, `password`, and `remember=yes` query parameters and the `#login-success` fragment) with `expect(page).toHaveURL(...)` |
+| `wingify.spec.ts` | "TC # 01 - verify the error message in free trail" — invalid-input validation on the VWO/Wingify free-trial page (`https://wingify.com/free-trial/`) — locates the email field with the `data-qa` attribute `[data-qa='page-su-step1-v1-email']`, fills an invalid value, accepts the marketing and GDPR consent checkboxes, clicks the `[data-qa='page-su-submit']` submit button, then reads the `.first()` `invalid-reason` element's `textContent()` and asserts with `toContain` that it holds `"The email address you entered is incorrect."` before pausing with `page.pause()` |
 
-Run just this practice spec:
+Run just the practice specs (the whole folder, all three files):
 
 ```bash
 npx playwright test tests/Practice_Test
@@ -175,3 +177,7 @@ node tests/01_Basics/BCP.spec.ts
 | End-to-end login flow with CSS id locators | `tests/Practice_Test/test.spec.ts` (`#btn-make-appointment`, `#txt-username`, `#txt-password`, `#btn-login`) |
 | Asserting exact element text | `tests/Practice_Test/test.spec.ts` (`toHaveText("Make Appointment")`) |
 | Fixed waits with `page.waitForTimeout()` | `tests/Practice_Test/test.spec.ts` |
+| Locating elements with XPath | `tests/Practice_Test/apptesting.spec.ts` (`//input[@id='email']`, `//button[@class='login-btn']`) |
+| Asserting on the current URL | `tests/Practice_Test/apptesting.spec.ts` (`toHaveURL`) |
+| Locating by `data-qa` attributes | `tests/Practice_Test/wingify.spec.ts` (`[data-qa='page-su-step1-v1-email']`) |
+| Validating inline error messages | `tests/Practice_Test/wingify.spec.ts` (`textContent`, `toContain`) |
