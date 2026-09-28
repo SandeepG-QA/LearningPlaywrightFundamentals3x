@@ -10,7 +10,7 @@ Tests are organized as a progressive learning path under `tests/`, numbered from
 |---------------|----------------|
 | `tests/01_Basics/` | Launching browsers, contexts, and pages; writing your first specs; running tests against multiple users and with custom context options |
 | `tests/02_TestAnnotations/` | Annotating and grouping tests — `skip`, `only`, `fail`, `fixme`, `slow`, and `describe` blocks |
-| `tests/03_Locator_Commands/` | Locator commands, CSS selectors, and element interaction practice — navigating with options, filling the VWO login form, and setting a page/context referer |
+| `tests/03_Locator_Commands/` | Locator commands, CSS selectors, and element interaction practice — navigating with options, filling the VWO login form, locating elements by role and accessible name, and setting a page/context referer |
 | `tests/Practice_Test/` | End-to-end practice flows — logging into the CURA healthcare demo app, signing into The Testing Academy app with XPath locators, and validating the VWO/Wingify free-trial email error |
 
 ### `tests/01_Basics/`
@@ -39,6 +39,8 @@ Tests are organized as a progressive learning path under `tests/`, numbered from
 | `LC.spec.ts` | Navigation-option practice in a `verify x` spec — `page.goto()` to the The Testing Academy multi-element filter page with `waitUntil: 'commit'`, then a second navigation to `/login` with `waitUntil: 'domcontentloaded'`, an explicit `timeout`, and a `referer` (the `response` is captured from `goto` for later inspection) |
 | `Fresh.spec.ts` | CSS-selector locator practice against the VWO login page (`https://app.vwo.com`) — navigates with `waitUntil: 'domcontentloaded'`, a `timeout`, and a `referer: "https://sdet.live"`, then locates the fields by id (`#login-username`, `#login-password`, `#js-login-btn`), fills and submits invalid credentials, asserts the error banner (`#js-notification-box-msg`) with `toContainText`, and pauses with `page.pause()` to inspect locators |
 | `Refere.spec.ts` | Setting a **referer for an entire context** — builds a context with `browser.newContext({ extraHTTPHeaders: { "Referer": ... } })` so every request carries the header, then opens one page and visits two sites (VWO login and the Katalon CURA demo app), logging after each navigation |
+| `getbyrole.spec.ts` | `getByRole` practice for **text inputs** against the Wingify/VWO login page (`https://app.wingify.com/#/login`) — locates the email and password boxes with `getByRole("textbox", { name: "email" })` and `getByRole("textbox", { name: "password" })`, fills `admin@vwo.com` / `1234`, then pauses with `page.pause()` to inspect the locators |
+| `getbyrole1.spec.ts` | `getByRole` practice for a **link** against the Katalon CURA demo app (`https://katalon-demo-cura.herokuapp.com/`) — clicks the "Make Appointment" link located with `getByRole("link", { name: "Make Appointment", exact: true })`, then pauses with `page.pause()` |
 
 ### `tests/Practice_Test/`
 
@@ -165,6 +167,7 @@ node tests/01_Basics/BCP.spec.ts
 | Custom context options | `tests/01_Basics/Test.Options.spec.ts` (viewport, locale, timezone, geolocation) |
 | Mobile device emulation | `tests/01_Basics/Test.Options.spec.ts` (`isMobile`, `hasTouch`) |
 | Locating elements by role and test id | `tests/01_Basics/tta-check.spec.ts` (`getByRole`, `getByTestId`) |
+| Locating textboxes and links by role and accessible name | `tests/03_Locator_Commands/getbyrole.spec.ts` (`getByRole("textbox", { name })`), `tests/03_Locator_Commands/getbyrole1.spec.ts` (`getByRole("link", { name, exact: true })`) |
 | Asserting on page title | `tests/01_Basics/example.spec.ts` (`toHaveTitle`) |
 | Test annotations (`skip`, `only`, `fail`, `fixme`, `slow`) | `tests/02_TestAnnotations/TestAnnotation.spec.ts` |
 | Grouping tests with `describe` | `tests/02_TestAnnotations/TestDescribe.spec.ts` |
@@ -173,7 +176,7 @@ node tests/01_Basics/BCP.spec.ts
 | CSS selectors by id and filling form fields | `tests/03_Locator_Commands/Fresh.spec.ts` (`#login-username`, `#js-login-btn`, `fill`, `click`) |
 | Asserting on element text | `tests/03_Locator_Commands/Fresh.spec.ts` (`toContainText`) |
 | Referer header per page vs. per context | `tests/03_Locator_Commands/Fresh.spec.ts` (`goto` option), `tests/03_Locator_Commands/Refere.spec.ts` (`extraHTTPHeaders` via `newContext`) |
-| Inspecting locators with `page.pause()` | `tests/03_Locator_Commands/Fresh.spec.ts` |
+| Inspecting locators with `page.pause()` | `tests/03_Locator_Commands/Fresh.spec.ts`, `tests/03_Locator_Commands/getbyrole.spec.ts`, `tests/03_Locator_Commands/getbyrole1.spec.ts` |
 | End-to-end login flow with CSS id locators | `tests/Practice_Test/test.spec.ts` (`#btn-make-appointment`, `#txt-username`, `#txt-password`, `#btn-login`) |
 | Asserting exact element text | `tests/Practice_Test/test.spec.ts` (`toHaveText("Make Appointment")`) |
 | Fixed waits with `page.waitForTimeout()` | `tests/Practice_Test/test.spec.ts` |
