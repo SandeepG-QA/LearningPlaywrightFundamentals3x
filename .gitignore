@@ -6,3 +6,12 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+.env
+
+# Generated artifacts
+/user-session.json
+/allure-results/
+/allure-report/
+/tta-report/
+/reports/
+
