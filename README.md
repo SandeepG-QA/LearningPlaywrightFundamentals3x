@@ -2,7 +2,7 @@
 
 Hands-on Playwright test automation fundamentals — a companion project to [Learning Playwright 3X](https://github.com/SandeepG-QA/LearningPlayWright3X) that takes the JavaScript/TypeScript basics and applies them to real browser automation with [`@playwright/test`](https://playwright.dev/).
 
-Tests are organized as a progressive learning path under `tests/`, numbered from the basics through test annotations, locator commands, session storage, Allure reporting, multiple-element filtering, and web tables, plus a `tests/Practice_Test/` folder for full end-to-end practice flows.
+Tests are organized as a progressive learning path under `tests/`, numbered from the basics through test annotations, locator commands, session storage, Allure reporting, multiple-element filtering, web tables, and web select/frames/iframes, plus a `tests/Practice_Test/` folder for full end-to-end practice flows.
 
 ## Project Structure
 
@@ -15,6 +15,7 @@ Tests are organized as a progressive learning path under `tests/`, numbered from
 | `tests/05_Allure_Report/` | Allure reporting — the session-reuse dashboard tests run with the Allure reporter, plus a per-test screenshot attachment and video capture |
 | `tests/06_Multiple_Element_Filter/` | Handling multiple matching elements — reading all link texts with `allInnerTexts()`, iterating real locators with `.all()`, and clicking one by its text |
 | `tests/07_WebTables/` | Web table automation — dynamic XPath row/column loops against `awesomeqa.com`, CSS-based row iteration, filtering many matches with `.filter({ hasText })`, CSS `:has()` row selection, and paging through a table with its Next button |
+| `tests/08_web_Select_Frames_Iframes/` | Web select dropdowns, frames, and iframes — selecting an option from a `<select>` dropdown (frames/iframes to follow) |
 | `tests/Practice_Test/` | End-to-end practice flows — logging into the CURA healthcare demo app, signing into The Testing Academy app with XPath locators, validating the VWO/Wingify free-trial email error, automating a web table, scraping Flipkart search results across pages, and running a create/search/delete employee flow on OrangeHRM |
 
 ### `tests/01_Basics/`
@@ -99,6 +100,14 @@ Reading, filtering, and paging through data in HTML tables.
 | `webTables3.spec.ts` | Selecting a table row by its text with **CSS instead of XPath** against The Testing Academy web table — clicks the first cell of the row containing `Rohan.Mehta` using the `tr:has(td:text('Rohan.Mehta'))` selector (the commented-out XPath `preceding-sibling::td/input` alternative is included for comparison), then waits a fixed 5s |
 | `webTable_Pagination.spec.ts` | Paging through The Testing Academy employee table (`https://app.thetestingacademy.com/playwright/tables/webtable`) to find a row that is not on the first page — loops on the `#employees-tbody tr` row filtered by `hasText` for `"Luca Greco"`, clicks `getByTestId('next-page')` while the row isn't visible, throws if the Next button becomes `isDisabled()`, then reads the found row's `td[data-col="email"]` and `td[data-col="country"]` cells |
 | `webTable_Pagination1.spec.ts` | The refactored pagination search — extracts the same `while` loop into a reusable `findRowByName(page, name): Promise<Locator>` helper that returns the located row, so the test simply calls it and reads the email/country cells |
+
+### `tests/08_web_Select_Frames_Iframes/`
+
+Web select (dropdown) practice; frames and iframes to follow.
+
+| File | What it covers |
+|------|----------------|
+| `Select_TestCase.spec.ts` | Verifies a `<select>` dropdown on the-internet demo page (`https://the-internet.herokuapp.com/dropdown`) — clicks the `#dropdown`, picks `"Option 2"` with `page.selectOption()`, then pauses with `page.pause()` |
 
 ### `tests/Practice_Test/`
 
@@ -208,6 +217,7 @@ npx playwright test tests/01_Basics
 npx playwright test tests/04_Session_Storage
 npx playwright test tests/06_Multiple_Element_Filter
 npx playwright test tests/07_WebTables
+npx playwright test tests/08_web_Select_Frames_Iframes
 ```
 
 Run a single spec file:
@@ -299,4 +309,5 @@ node tests/04_Session_Storage/SessionStorage.ts
 | Scraping search results across pages | `tests/Practice_Test/FlipkartAutomate.spec.ts` (product/price locators, `Next` link loop) |
 | End-to-end create/search/delete flow | `tests/Practice_Test/OrangeOHRM.spec.ts` |
 | Asserting dynamic toast messages | `tests/Practice_Test/OrangeOHRM.spec.ts` (`getByText('Successfully Saved')`, `toBeVisible`) |
+| Selecting an option from a dropdown | `tests/08_web_Select_Frames_Iframes/Select_TestCase.spec.ts` (`selectOption()`) |
 | Starter spec scaffold | `template/template.spec.ts` |
