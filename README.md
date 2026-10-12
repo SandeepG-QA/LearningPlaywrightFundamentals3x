@@ -14,8 +14,8 @@ Tests are organized as a progressive learning path under `tests/`, numbered from
 | `tests/04_Session_Storage/` | Reusing an authenticated session — saving the browser `storageState` to `user-session.json` and loading it so specs land on the dashboard without logging in |
 | `tests/05_Allure_Report/` | Allure reporting — the session-reuse dashboard tests run with the Allure reporter, plus a per-test screenshot attachment and video capture |
 | `tests/06_Multiple_Element_Filter/` | Handling multiple matching elements — reading all link texts with `allInnerTexts()`, iterating real locators with `.all()`, and clicking one by its text |
-| `tests/07_WebTables/` | Web table automation — dynamic XPath row/column loops against `awesomeqa.com` and CSS-based row iteration |
-| `tests/Practice_Test/` | End-to-end practice flows — logging into the CURA healthcare demo app, signing into The Testing Academy app with XPath locators, validating the VWO/Wingify free-trial email error, and automating a web table |
+| `tests/07_WebTables/` | Web table automation — dynamic XPath row/column loops against `awesomeqa.com`, CSS-based row iteration, filtering many matches with `.filter({ hasText })`, CSS `:has()` row selection, and paging through a table with its Next button |
+| `tests/Practice_Test/` | End-to-end practice flows — logging into the CURA healthcare demo app, signing into The Testing Academy app with XPath locators, validating the VWO/Wingify free-trial email error, automating a web table, scraping Flipkart search results across pages, and running a create/search/delete employee flow on OrangeHRM |
 
 ### `tests/01_Basics/`
 
@@ -89,12 +89,16 @@ Locating and filtering when a selector matches many elements, against The Testin
 
 ### `tests/07_WebTables/`
 
-Reading and filtering data out of HTML tables.
+Reading, filtering, and paging through data in HTML tables.
 
 | File | What it covers |
 |------|----------------|
 | `webTables.spec.ts` | Dynamic XPath practice against `https://awesomeqa.com/webtable.html` — counts rows and columns with `locator(...).count()`, then builds cell paths at runtime (`//table[@id='customers']/tbody/tr[i]/td[j]`) in nested `for` loops. When a cell contains `"Helen Bennett"` it reads the neighbouring cell with the `following-sibling::td` axis and logs her country |
 | `webTables1.spec.ts` | CSS-based table iteration against `https://awesomeqa.com/webtable1.html` — selects every row with `table[summary="Sample Table"] tbody tr`, counts them, and for each row reads all cell texts with `rows.nth(i).locator('td').allInnerTexts()`, logging each row's data |
+| `webTables2.spec.ts` | Filtering many matches down to one with `.filter({ hasText })` against The Testing Academy multi-element page — clicks the `Forgotten Password` link out of all `a.list-group-item` rows, then asserts the footer `Privacy` link's `href` is `#privacy-policy` with `toHaveAttribute` |
+| `webTables3.spec.ts` | Selecting a table row by its text with **CSS instead of XPath** against The Testing Academy web table — clicks the first cell of the row containing `Rohan.Mehta` using the `tr:has(td:text('Rohan.Mehta'))` selector (the commented-out XPath `preceding-sibling::td/input` alternative is included for comparison), then waits a fixed 5s |
+| `webTable_Pagination.spec.ts` | Paging through The Testing Academy employee table (`https://app.thetestingacademy.com/playwright/tables/webtable`) to find a row that is not on the first page — loops on the `#employees-tbody tr` row filtered by `hasText` for `"Luca Greco"`, clicks `getByTestId('next-page')` while the row isn't visible, throws if the Next button becomes `isDisabled()`, then reads the found row's `td[data-col="email"]` and `td[data-col="country"]` cells |
+| `webTable_Pagination1.spec.ts` | The refactored pagination search — extracts the same `while` loop into a reusable `findRowByName(page, name): Promise<Locator>` helper that returns the located row, so the test simply calls it and reads the email/country cells |
 
 ### `tests/Practice_Test/`
 
@@ -104,8 +108,10 @@ Reading and filtering data out of HTML tables.
 | `apptesting.spec.ts` | "TC # 01 - Student login on app testing academy" — a login flow on The Testing Academy practice app that exercises **XPath locators** instead of CSS: navigates to `https://app.thetestingacademy.com/playwright/multiple_element_filter`, fills the Email Address (`//input[@id='email']`) and Password (`//input[@id='password']`) fields, ticks the `//input[@type='checkbox']` consent box, clicks the `//button[@class='login-btn']` submit button, and asserts the resulting URL (including the reflected `email`, `password`, and `remember=yes` query parameters and the `#login-success` fragment) with `expect(page).toHaveURL(...)` |
 | `wingify.spec.ts` | "TC # 01 - verify the error message in free trail" — invalid-input validation on the VWO/Wingify free-trial page (`https://wingify.com/free-trial/`) — locates the email field with the `data-qa` attribute `[data-qa='page-su-step1-v1-email']`, fills an invalid value, accepts the marketing and GDPR consent checkboxes, clicks the `[data-qa='page-su-submit']` submit button, then reads the `.first()` `invalid-reason` element's `textContent()` and asserts with `toContain` that it holds `"The email address you entered is incorrect."` before pausing with `page.pause()` |
 | `webTableAutomate.spec.ts` | "Automate Web Table" against The Testing Academy web table (`https://app.thetestingacademy.com/playwright/webtable`) — counts rows and columns of `//tbody[@id='employee-body']/tr`, then loops building each cell's XPath dynamically (`//tbody[@id='employee-body']/tr[i]/td[j]`). When a cell contains `"Rohan.Mehta"` it ticks that row's checkbox with the `preceding-sibling::td/input[@type='checkbox']` axis and `check()`, before pausing with `page.pause()` |
+| `FlipkartAutomate.spec.ts` | "Automate Flipkart" — a real e-commerce scrape: dismisses the login modal with `getByRole('button', { name: '✕' })`, searches the `input[name='q']` box for `"DSLR Camera"`, presses `Enter`, asserts the resulting search URL with `toHaveURL`, then pages through the results while the `Next` link stays enabled — logging each product name (`div.RG5Slk`) and price (`div.hZ3P6w.DeU9vF`) |
+| `OrangeOHRM.spec.ts` | "OrangeHRM Test" — a full **create → search → delete** employee flow on the OrangeHRM open-source demo: logs in as `Admin`/`admin123` via `getByRole`, adds an employee (first/last name plus an Employee Id located with the `//label[text()="Employee Id"]/following::input` axis), asserts the `Successfully Saved` toast, searches that employee back up by id, selects its row checkbox (`//i[...oxd-checkbox-input-icon]`), deletes via `Delete Selected` → `Yes, Delete`, and asserts `Successfully Deleted` |
 
-Run just the practice specs (the whole folder, all four files):
+Run just the practice specs (the whole folder, all six files):
 
 ```bash
 npx playwright test tests/Practice_Test
@@ -271,7 +277,7 @@ node tests/04_Session_Storage/SessionStorage.ts
 | Asserting on the current URL | `tests/Practice_Test/apptesting.spec.ts` (`toHaveURL`) |
 | Locating by `data-qa` attributes | `tests/Practice_Test/wingify.spec.ts` (`[data-qa='page-su-step1-v1-email']`) |
 | Validating inline error messages | `tests/Practice_Test/wingify.spec.ts` (`textContent`, `toContain`) |
-| Automating a web table | `tests/07_WebTables/webTables.spec.ts`, `tests/07_WebTables/webTables1.spec.ts`, `tests/Practice_Test/webTableAutomate.spec.ts` |
+| Automating a web table | `tests/07_WebTables/webTables.spec.ts`, `tests/07_WebTables/webTables1.spec.ts`, `tests/07_WebTables/webTable_Pagination.spec.ts`, `tests/Practice_Test/webTableAutomate.spec.ts` |
 | Reading credentials from `.env` with `dotenv` | `tests/04_Session_Storage/SessionStorage.ts` (`dotenv.config()`, `process.env.VWO_USER`) |
 | Reusing an authenticated session | `tests/04_Session_Storage/SessionStorage.ts` (`context.storageState({ path })`), `tests/04_Session_Storage/TestWingify.spec.ts` (`test.use({ storageState })`) |
 | Attaching screenshots and recording video | `tests/05_Allure_Report/TestWingify2.spec.ts` (`video: 'on'`, `testInfo.attach` in `test.afterEach`) |
@@ -282,7 +288,15 @@ node tests/04_Session_Storage/SessionStorage.ts
 | Clicking one element out of many by its text | `tests/06_Multiple_Element_Filter/ME.spec.ts` (`getByText(...).first().click()`) |
 | Counting rows and columns | `tests/07_WebTables/webTables.spec.ts`, `tests/07_WebTables/webTables1.spec.ts`, `tests/Practice_Test/webTableAutomate.spec.ts` (`count()`) |
 | Dynamic XPath built in loops | `tests/07_WebTables/webTables.spec.ts`, `tests/Practice_Test/webTableAutomate.spec.ts` |
-| XPath axes (`following-sibling`, `preceding-sibling`) | `tests/07_WebTables/webTables.spec.ts`, `tests/Practice_Test/webTableAutomate.spec.ts` |
+| XPath axes (`following-sibling`, `preceding-sibling`, `following`) | `tests/07_WebTables/webTables.spec.ts`, `tests/Practice_Test/webTableAutomate.spec.ts`, `tests/Practice_Test/OrangeOHRM.spec.ts` |
 | CSS table iteration with `nth()` | `tests/07_WebTables/webTables1.spec.ts` (`rows.nth(i).locator('td')`) |
 | Checking a checkbox | `tests/Practice_Test/webTableAutomate.spec.ts` (`check()`) |
+| Filtering a locator by its text | `tests/07_WebTables/webTables2.spec.ts` (`.filter({ hasText })`) |
+| Asserting an element attribute | `tests/07_WebTables/webTables2.spec.ts` (`toHaveAttribute`) |
+| Selecting a row with CSS `:has()` / `:text()` | `tests/07_WebTables/webTables3.spec.ts` (`tr:has(td:text('Rohan.Mehta'))`) |
+| Paging through a table until a row is found | `tests/07_WebTables/webTable_Pagination.spec.ts` (`getByTestId('next-page')`, `isVisible`, `isDisabled`) |
+| Extracting a helper that returns a Locator | `tests/07_WebTables/webTable_Pagination1.spec.ts` (`findRowByName(): Promise<Locator>`) |
+| Scraping search results across pages | `tests/Practice_Test/FlipkartAutomate.spec.ts` (product/price locators, `Next` link loop) |
+| End-to-end create/search/delete flow | `tests/Practice_Test/OrangeOHRM.spec.ts` |
+| Asserting dynamic toast messages | `tests/Practice_Test/OrangeOHRM.spec.ts` (`getByText('Successfully Saved')`, `toBeVisible`) |
 | Starter spec scaffold | `template/template.spec.ts` |
