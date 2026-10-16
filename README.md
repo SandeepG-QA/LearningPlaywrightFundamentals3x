@@ -17,7 +17,7 @@ Tests are organized as a progressive learning path under `tests/`, numbered from
 | `tests/07_WebTables/` | Web table automation — dynamic XPath row/column loops against `awesomeqa.com`, CSS-based row iteration, filtering many matches with `.filter({ hasText })`, CSS `:has()` row selection, and paging through a table with its Next button |
 | `tests/08_web_Select_Frames_Iframes/` | Web select dropdowns — selecting an option from a native `<select>`, plus standard and advanced custom dropdown components (trigger-based, searchable, multi, creatable, and async selects) |
 | `tests/09_Frame_Iframe/` | Frames and iframes — reading and filling a form inside an iframe, working with several named frames on one page, and chaining nested iframes |
-| `tests/Practice_Test/` | End-to-end practice flows — logging into the CURA healthcare demo app, signing into The Testing Academy app with XPath locators, validating the VWO/Wingify free-trial email error, automating a web table, scraping Flipkart search results across pages, and running a create/search/delete employee flow on OrangeHRM |
+| `tests/Practice_Test/` | End-to-end practice flows — logging into the CURA healthcare demo app, signing into The Testing Academy app with XPath locators, validating the VWO/Wingify free-trial email error, automating a web table, scraping Flipkart search results across pages, running a create/search/delete employee flow on OrangeHRM, and filling out a validated QA profile form |
 
 ### `tests/01_Basics/`
 
@@ -138,8 +138,9 @@ npx playwright test tests/09_Frame_Iframe
 | `webTableAutomate.spec.ts` | "Automate Web Table" against The Testing Academy web table (`https://app.thetestingacademy.com/playwright/webtable`) — counts rows and columns of `//tbody[@id='employee-body']/tr`, then loops building each cell's XPath dynamically (`//tbody[@id='employee-body']/tr[i]/td[j]`). When a cell contains `"Rohan.Mehta"` it ticks that row's checkbox with the `preceding-sibling::td/input[@type='checkbox']` axis and `check()`, before pausing with `page.pause()` |
 | `FlipkartAutomate.spec.ts` | "Automate Flipkart" — a real e-commerce scrape: dismisses the login modal with `getByRole('button', { name: '✕' })`, searches the `input[name='q']` box for `"DSLR Camera"`, presses `Enter`, asserts the resulting search URL with `toHaveURL`, then pages through the results while the `Next` link stays enabled — logging each product name (`div.RG5Slk`) and price (`div.hZ3P6w.DeU9vF`) |
 | `OrangeOHRM.spec.ts` | "OrangeHRM Test" — a full **create → search → delete** employee flow on the OrangeHRM open-source demo: logs in as `Admin`/`admin123` via `getByRole`, adds an employee (first/last name plus an Employee Id located with the `//label[text()="Employee Id"]/following::input` axis), asserts the `Successfully Saved` toast, searches that employee back up by id, selects its row checkbox (`//i[...oxd-checkbox-input-icon]`), deletes via `Delete Selected` → `Yes, Delete`, and asserts `Successfully Deleted` |
+| `qaProfileForm.spec.ts` | "QA Profile form" — fills out a longer profile form on The Testing Academy practice page (`https://app.thetestingacademy.com/playwright/tables/practice#page`) — enters the first/last name by test id (`first-name`, `last-name`), picks a gender (`gender-male`), chooses years of experience (`years-experience` test-id click plus `selectOption('#years-experience', '2')`), fills the date via `getByRole('textbox', { name: 'date' })`, picks a profession (`profession-automation`), ticks the "Selenium Webdriver" checkbox by role, chooses a continent (`continent-asia`), switches a tab (`tab-navigation`), and clicks `Save profile` — then asserts the `#submission-output` block is visible and that its JSON contains `"firstName": "aman"` before pausing |
 
-Run just the practice specs (the whole folder, all six files):
+Run just the practice specs (the whole folder, all seven files):
 
 ```bash
 npx playwright test tests/Practice_Test
@@ -328,6 +329,10 @@ node tests/04_Session_Storage/SessionStorage.ts
 | Extracting a helper that returns a Locator | `tests/07_WebTables/webTable_Pagination1.spec.ts` (`findRowByName(): Promise<Locator>`) |
 | Scraping search results across pages | `tests/Practice_Test/FlipkartAutomate.spec.ts` (product/price locators, `Next` link loop) |
 | End-to-end create/search/delete flow | `tests/Practice_Test/OrangeOHRM.spec.ts` |
+| Filling a multi-field form by test id | `tests/Practice_Test/qaProfileForm.spec.ts` (`getByTestId('first-name')`, `gender-male`, `continent-asia`, `tab-navigation`) |
+| Selecting a value from a `<select>` by id | `tests/Practice_Test/qaProfileForm.spec.ts` (`selectOption('#years-experience', '2')`) |
+| Ticking a checkbox by role | `tests/Practice_Test/qaProfileForm.spec.ts` (`getByRole('checkbox', { name: 'Selenium Webdriver' })`) |
+| Asserting on JSON submission output | `tests/Practice_Test/qaProfileForm.spec.ts` (`textContent()`, `toContain('"firstName": "aman"')`) |
 | Asserting dynamic toast messages | `tests/Practice_Test/OrangeOHRM.spec.ts` (`getByText('Successfully Saved')`, `toBeVisible`) |
 | Selecting an option from a dropdown | `tests/08_web_Select_Frames_Iframes/Select_TestCase.spec.ts` (`selectOption()`) |
 | Selecting an option from a custom (non-`<select>`) dropdown | `tests/08_web_Select_Frames_Iframes/Custom_Dropdown_Select_TestCase.spec.ts` (`getByTestId` trigger + `getByRole('option', { name })` / `getByText().first()`) |
