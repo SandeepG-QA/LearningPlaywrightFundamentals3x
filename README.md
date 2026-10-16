@@ -2,7 +2,7 @@
 
 Hands-on Playwright test automation fundamentals — a companion project to [Learning Playwright 3X](https://github.com/SandeepG-QA/LearningPlayWright3X) that takes the JavaScript/TypeScript basics and applies them to real browser automation with [`@playwright/test`](https://playwright.dev/).
 
-Tests are organized as a progressive learning path under `tests/`, numbered from the basics through test annotations, locator commands, session storage, Allure reporting, multiple-element filtering, web tables, and web select/frames/iframes, plus a `tests/Practice_Test/` folder for full end-to-end practice flows.
+Tests are organized as a progressive learning path under `tests/`, numbered from the basics through test annotations, locator commands, session storage, Allure reporting, multiple-element filtering, web tables, web selects and custom dropdowns, and frames/iframes, plus a `tests/Practice_Test/` folder for full end-to-end practice flows.
 
 ## Project Structure
 
@@ -15,7 +15,8 @@ Tests are organized as a progressive learning path under `tests/`, numbered from
 | `tests/05_Allure_Report/` | Allure reporting — the session-reuse dashboard tests run with the Allure reporter, plus a per-test screenshot attachment and video capture |
 | `tests/06_Multiple_Element_Filter/` | Handling multiple matching elements — reading all link texts with `allInnerTexts()`, iterating real locators with `.all()`, and clicking one by its text |
 | `tests/07_WebTables/` | Web table automation — dynamic XPath row/column loops against `awesomeqa.com`, CSS-based row iteration, filtering many matches with `.filter({ hasText })`, CSS `:has()` row selection, and paging through a table with its Next button |
-| `tests/08_web_Select_Frames_Iframes/` | Web select dropdowns, frames, and iframes — selecting an option from a `<select>` dropdown (frames/iframes to follow) |
+| `tests/08_web_Select_Frames_Iframes/` | Web select dropdowns — selecting an option from a native `<select>`, plus standard and advanced custom dropdown components (trigger-based, searchable, multi, creatable, and async selects) |
+| `tests/09_Frame_Iframe/` | Frames and iframes — reading and filling a form inside an iframe, working with several named frames on one page, and chaining nested iframes |
 | `tests/Practice_Test/` | End-to-end practice flows — logging into the CURA healthcare demo app, signing into The Testing Academy app with XPath locators, validating the VWO/Wingify free-trial email error, automating a web table, scraping Flipkart search results across pages, and running a create/search/delete employee flow on OrangeHRM |
 
 ### `tests/01_Basics/`
@@ -103,11 +104,29 @@ Reading, filtering, and paging through data in HTML tables.
 
 ### `tests/08_web_Select_Frames_Iframes/`
 
-Web select (dropdown) practice; frames and iframes to follow.
+Web select (dropdown) practice — the native HTML `<select>` control plus the custom dropdown widgets you meet in modern apps (which are built from `<div>`s, not `<select>`, so they need clicking rather than `selectOption()`).
 
 | File | What it covers |
 |------|----------------|
 | `Select_TestCase.spec.ts` | Verifies a `<select>` dropdown on the-internet demo page (`https://the-internet.herokuapp.com/dropdown`) — clicks the `#dropdown`, picks `"Option 2"` with `page.selectOption()`, then pauses with `page.pause()` |
+| `Custom_Dropdown_Select_TestCase.spec.ts` | Custom (non-`<select>`) dropdowns against The Testing Academy dropdowns page (`https://app.thetestingacademy.com/playwright/tables/dropdowns`) — opens each trigger by its test id (`getByTestId('lang-trigger')`, `framework-trigger`, `experience-trigger`) and selects an option by role or text (`getByRole('option', { name: 'JavaScript' })`, `getByText('Angular').first()`, `getByText('Junior (0-3 years)').first()`), then pauses |
+| `Advance_Custome_Dropdown_Select.spec.ts` | The advanced dropdown components on The Testing Academy select-boxes page (`https://app.thetestingacademy.com/playwright/tables/select-boxes`) — a **single searchable** select (`#rs-single` → `Cypress`), a **multi searchable** select (`#rs-multi` → `Pytest` + `JUnit`, closed with `page.keyboard.press('Escape')`), a **creatable multi** select (`#rs-creatable` → `api-testing` + `performance`), and an **async** select that fetches options as you type (`#rs-async`, types `"de"`, asserts the `rs-async-menu` satisfies `toContainText('Delhi')`, then clicks the `Delhi` option by role) before pausing |
+
+### `tests/09_Frame_Iframe/`
+
+Working with frames and iframes — Playwright steps into them with `page.frameLocator()` and chains frame locators to reach nesting.
+
+| File | What it covers |
+|------|----------------|
+| `iFrame_TestCase.spec.ts` | Filling a form **inside a single iframe** on The Testing Academy frames page (`https://app.thetestingacademy.com/playwright/frames/`) — types a reusable `FrameLocator` from `page.frameLocator('#frame-one')`, then fills the vehicle registration fields through it (`#RESULT_TextField-1/2/3`, picks a body type with `selectOption('Sedan')`, `#RESULT_TextField-4`, `#RESULT_TextArea-1`), clicks `Submit registration`, reads the result back with `#vehicle-output` `innerText()`, and pauses |
+| `multi_iFrame_TestCase.spec.ts` | Several frames on one page (`https://app.thetestingacademy.com/playwright/frames/multi-frames`) — reads a heading through the `main` frame (`page.frameLocator('[name="main"]')`), lists every frame with `page.locator('//frame').all()` and logs each frame's `name` and `src` attributes in a loop, then clicks a link inside the `side` frame via `getByTestId('side-link-registration')` before pausing |
+| `nested_iFrame_TestCase.spec.ts` | Chaining **nested iframes** on the SelectorsHub scenario page (`https://selectorshub.com/iframe-scenario`) — counts the outer `#pact1` iframe, then nests locators three levels deep (`frame1 = page.frameLocator('#pact1')` → `frame2 = frame1.frameLocator('#pact2')` → `frame3 = frame2.frameLocator('#pact3')`) and fills one field at each level (`#inp_val` → `Aishwarya Rai`, `#jex` → `Wife`, `#glaf` → `Playwright`) before pausing |
+
+Run this folder:
+
+```bash
+npx playwright test tests/09_Frame_Iframe
+```
 
 ### `tests/Practice_Test/`
 
@@ -218,6 +237,7 @@ npx playwright test tests/04_Session_Storage
 npx playwright test tests/06_Multiple_Element_Filter
 npx playwright test tests/07_WebTables
 npx playwright test tests/08_web_Select_Frames_Iframes
+npx playwright test tests/09_Frame_Iframe
 ```
 
 Run a single spec file:
@@ -310,4 +330,10 @@ node tests/04_Session_Storage/SessionStorage.ts
 | End-to-end create/search/delete flow | `tests/Practice_Test/OrangeOHRM.spec.ts` |
 | Asserting dynamic toast messages | `tests/Practice_Test/OrangeOHRM.spec.ts` (`getByText('Successfully Saved')`, `toBeVisible`) |
 | Selecting an option from a dropdown | `tests/08_web_Select_Frames_Iframes/Select_TestCase.spec.ts` (`selectOption()`) |
+| Selecting an option from a custom (non-`<select>`) dropdown | `tests/08_web_Select_Frames_Iframes/Custom_Dropdown_Select_TestCase.spec.ts` (`getByTestId` trigger + `getByRole('option', { name })` / `getByText().first()`) |
+| Searchable, multi, creatable, and async dropdowns | `tests/08_web_Select_Frames_Iframes/Advance_Custome_Dropdown_Select.spec.ts` (multi-select + `Escape`, async menu assertion, type-to-fetch) |
+| Working inside an iframe with `frameLocator()` | `tests/09_Frame_Iframe/iFrame_TestCase.spec.ts` |
+| Typing a `FrameLocator` and locating elements within a frame | `tests/09_Frame_Iframe/iFrame_TestCase.spec.ts`, `tests/09_Frame_Iframe/multi_iFrame_TestCase.spec.ts` |
+| Enumerating frames and reading their attributes | `tests/09_Frame_Iframe/multi_iFrame_TestCase.spec.ts` (`page.locator('//frame').all()`, `getAttribute('name')` / `getAttribute('src')`) |
+| Chaining nested frame locators | `tests/09_Frame_Iframe/nested_iFrame_TestCase.spec.ts` |
 | Starter spec scaffold | `template/template.spec.ts` |
